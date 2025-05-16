@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Статистика обогрева</title>
+    <link href="app.css" rel="stylesheet" />
+</head>
+
+<body>
+    <div class="container">
+        <h1>Статистика обогрева</h1>
+        <div>            
+            <a href="managment_device.html">Управление устройствами</a>
+            <a href="gpio_settings.html">Настройки GPIO</a>
+            <a href="index.html">На главную</a>
+        </div>
+        <br />
+        <table id="stats-table">
+            <thead>
+                <tr>
+                    <th>Название</th>
+                    <th>Температура</th>
+                    <th>Целевая температура</th>
+                    <th>Статус обогрева</th>
+                    <th>Общее время работы</th>
+                </tr>
+            </thead>
+            <tbody id="stats-body">
+                <tr>
+                    <td colspan="5">Загрузка данных...</td>
+                </tr>
+            </tbody>
+        </table>
+        <br />
+        <button class="button" onclick="refreshStats()">Обновить статистику</button>
+        <!-- Добавляем кнопку сброса статистики -->
+        <button class="button" onclick="resetStats()">Сбросить статистику</button>
+    </div>
+
+    <script>
+        // Загрузка данных при загрузке страницы
+        document.addEventListener('DOMContentLoaded', function () {
+            refreshStats();
+            // Обновляем статистику каждые 10 секунд
+            setInterval(refreshStats, 10000);
+        });
+
+        // Функция обновления статистики
+        function refreshStats() {
+            fetch('/heating_stats')
+                .then(response => response.json())
+                .then(data => {
+                    displayStat(data);
+                })
+                .catch(error => {
+                    // displayStat([{ name: "dev1", currentTemperature: 20, targetTemperature: 22, heatingActive: true, totalHeatingTimeMs: 10000, totalHeatingTimeFormatted: "00:16:40" },
+                    // { name: "dev2", currentTemperature: 21, targetTemperature: 22, heatingActive: false, totalHeatingTimeMs: 10000, totalHeatingTimeFormatted: "00:16:40" }
+                    // ]);
+                    console.error('Ошибка при получении статистики:', error);
+                    document.getElementById('stats-body').innerHTML ='<tr><td colspan="5">Ошибка при загрузке данных</td></tr>';
+                });
+        }
+
+        function displayStat(data) {
+            const tbody = document.getElementById('stats-body');
+            tbody.innerHTML = '';
+
+            data.forEach(device => {
+                const row = document.createElement('tr');
+
+                // Название устройства
+                const nameCell = document.createElement('td');
+                nameCell.textContent = device.name;
+                row.appendChild(nameCell);
+
+                // Текущая температура
+                const tempCell = document.createElement('td');
+                tempCell.textContent = device.currentTemperature + '°C';
+                row.appendChild(tempCell);
+
+                // Целевая температура
+                const targetCell = document.createElement('td');
+                targetCell.textContent = device.targetTemperature + '°C';
+                row.appendChild(targetCell);
+                // Статус обогрева
+                const statusCell = document.createElement('td');
+                if (device.heatingActive) {
+                    statusCell.textContent = 'Активен';
+                    statusCell.className = 'active';
+                } else {
+                    statusCell.textContent = 'Неактивен';
+                    statusCell.className = 'inactive';
+                }
+                row.appendChild(statusCell);
+
+                // Общее время работы
+                const timeCell = document.createElement('td');
+                timeCell.textContent = device.totalHeatingTimeFormatted;
+                row.appendChild(timeCell);
+
+                tbody.appendChild(row);
+            });
+        }
+
+        // Функция сброса статистики
+        function resetStats() {
+            if (confirm('Вы уверены, что хотите сбросить статистику обогрева для всех устройств?')) {
+                fetch('/reset_stats', {
+                    method: 'POST'
+                })
+                    .then(response => response.text())
+                    .then(data => {
+                        alert(data);
+                        refreshStats();
+                    })
+                    .catch(error => {
+                        console.error('Ошибка при сбросе статистики:', error);
+                        alert('Ошибка при сбросе статистики');
+                    });
+            }
+        }
+    </script>
+</body>
+
+</html>
