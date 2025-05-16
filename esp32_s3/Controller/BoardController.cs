@@ -1,5 +1,4 @@
-﻿
-using nanoFramework.WebServer;
+﻿using nanoFramework.WebServer;
 using System.Net;
 using System;
 using esp32_s3.Interfaces;
@@ -12,10 +11,11 @@ namespace esp32_s3.Controller
     public class BoardController
     {
         readonly IBoardManager _boardManager;
-
-        public BoardController(IBoardManager boardManager)
+        readonly IBluetoothManager _bluetoothManager;
+        public BoardController(IBoardManager boardManager, IBluetoothManager bluetoothManager)
         {
             _boardManager = boardManager;
+            _bluetoothManager = bluetoothManager;
         }
 
         [Route("serverinfo")]
@@ -23,23 +23,22 @@ namespace esp32_s3.Controller
         public void GetServerInfo(WebServerEventArgs e)
         {
             try
-            {               
+            {
                 nanoFramework.Hardware.Esp32.NativeMemory.GetMemoryInfo(nanoFramework.Hardware.Esp32.NativeMemory.MemoryType.SpiRam, out var totalSpi, out var freeSpi, out var largestFreeBlockSpi);
                 nanoFramework.Hardware.Esp32.NativeMemory.GetMemoryInfo(nanoFramework.Hardware.Esp32.NativeMemory.MemoryType.Internal, out var totalInternal, out var freeInternal, out var largestFreeBlockInternal);
 
-                var responseModel = new
-                {
+                var responseModel = new ServerInfo(
                     totalSpi,
                     freeSpi,
                     largestFreeBlockSpi,
                     totalInternal,
                     freeInternal,
                     largestFreeBlockInternal,
-                    workTime = _boardManager.GetWorkTimeString,
-                    boardTemperature = _boardManager.BoardTemperature
-                };
+                    _boardManager.GetWorkTimeString,
+                    _boardManager.BoardTemperature
+                );
 
-                var response = JsonSerializer.SerializeObject(responseModel);
+                var response = JsonConvert.SerializeObject(responseModel);
                 e.Context.Response.ContentType = "application/json";
                 e.Context.Response.ContentLength64 = response.Length;
                 WebServer.OutPutStream(e.Context.Response, response);
@@ -56,7 +55,7 @@ namespace esp32_s3.Controller
         {
             try
             {
-                var response = JsonSerializer.SerializeObject(_boardManager.GetGpio);
+                var response = JsonConvert.SerializeObject(_boardManager.GetGpio);
                 e.Context.Response.ContentType = "application/json";
                 e.Context.Response.ContentLength64 = response.Length;
                 WebServer.OutPutStream(e.Context.Response, response);
@@ -90,7 +89,7 @@ namespace esp32_s3.Controller
         {
             try
             {
-                
+                _bluetoothManager.StartXiaomiScan();
                 WebServer.OutputHttpCode(e.Context.Response, HttpStatusCode.OK);
             }
             catch (Exception ex)

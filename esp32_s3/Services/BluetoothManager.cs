@@ -6,7 +6,6 @@ using System.Diagnostics;
 using System.Threading;
 using esp32_s3.Models;
 using esp32_s3.Interfaces;
-using esp32_s3.Controller;
 
 namespace esp32_s3.Services
 {

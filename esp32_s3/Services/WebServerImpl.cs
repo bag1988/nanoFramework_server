@@ -26,7 +26,7 @@ namespace esp32_s3.Services
         {
             try
             {
-                _server = new WebServer(80, HttpProtocol.Http, new Type[] { typeof(DevicesController), typeof(BoardController), typeof(HeatingStatsController) });
+                //_server = new WebServer(80, HttpProtocol.Http, new Type[] { typeof(DevicesController), typeof(BoardController), typeof(HeatingStatsController) });
                 _server.CommandReceived += ServerCommandReceived;
                 _server.WebServerStatusChanged += WebServerStatusChanged;
                 _server.Start();

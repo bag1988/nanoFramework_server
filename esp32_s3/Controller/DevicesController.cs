@@ -1,5 +1,4 @@
-﻿
-using nanoFramework.WebServer;
+﻿using nanoFramework.WebServer;
 using System.Net;
 using System;
 using esp32_s3.Interfaces;
@@ -24,7 +23,7 @@ namespace esp32_s3.Controller
         {
             try
             {
-                var response = JsonSerializer.SerializeObject(_devicesManager.GetDevices);
+                var response = JsonConvert.SerializeObject(_devicesManager.GetDevices);
                 e.Context.Response.ContentType = "application/json";
                 e.Context.Response.ContentLength64 = response.Length;
                 WebServer.OutPutStream(e.Context.Response, response);

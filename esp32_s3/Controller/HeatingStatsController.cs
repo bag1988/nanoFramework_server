@@ -1,9 +1,11 @@
-﻿using esp32_s3.Interfaces;
-using nanoFramework.Json;
-using nanoFramework.WebServer;
-using System;
-using System.Collections;
+﻿using nanoFramework.WebServer;
 using System.Net;
+using System;
+using esp32_s3.Interfaces;
+using nanoFramework.Json;
+using System.Collections;
+using esp32_s3.Models;
+
 
 namespace esp32_s3.Controller
 {
@@ -28,19 +30,19 @@ namespace esp32_s3.Controller
 
                 foreach (var device in devList)
                 {
-                    infoModel.Add(new
-                    {
+                    infoModel.Add(new HeatingStatsInfo
+                    (
                         device.Name,
                         device.MacAddress,
                         device.CurrentTemperature,
                         device.TargetTemperature,
                         device.HeatingActive,
                         device.TotalHeatingTime,
-                        TotalHeatingTimeFormatted = device.TotalHeatingTime.Days + " дней " + device.TotalHeatingTime.Hours + " часов " + device.TotalHeatingTime.Minutes + " минут " + device.TotalHeatingTime.Seconds + " секунд"
-                    });
+                        device.TotalHeatingTime.Days + " дней " + device.TotalHeatingTime.Hours + " часов " + device.TotalHeatingTime.Minutes + " минут " + device.TotalHeatingTime.Seconds + " секунд"
+                    ));
                 }
 
-                var response = JsonSerializer.SerializeObject(infoModel);
+                var response = JsonConvert.SerializeObject(infoModel);
                 e.Context.Response.ContentType = "application/json";
                 e.Context.Response.ContentLength64 = response.Length;
                 WebServer.OutPutStream(e.Context.Response, response);
