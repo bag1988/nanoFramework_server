@@ -3,6 +3,7 @@
 ################################################################################
 
 /esp32_s3/Properties
-/esp32_s3/obj/Debug
-/.vs/nanoFramework_server
+/esp32_s3/obj/*
+/esp32_s3/bin/*
+/.vs/*
 /packages
